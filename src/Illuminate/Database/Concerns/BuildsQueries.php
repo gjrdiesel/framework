@@ -119,9 +119,13 @@ trait BuildsQueries
      * @param  callable  $default
      * @return mixed|$this
      */
-    public function unless($value, $callback, $default = null)
+    public function unless($value, $callback = null, $default = null)
     {
-        if (! $value) {
+        if (is_array($value) && $callback == null) {
+            foreach ($value as $key => $value) {
+                return !$value ? $this->where($key, $value) : $this;
+            }
+        } elseif (!$value) {
             return $callback($this, $value) ?: $this;
         } elseif ($default) {
             return $default($this, $value) ?: $this;

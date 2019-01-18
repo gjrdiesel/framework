@@ -224,6 +224,24 @@ class DatabaseQueryBuilderTest extends TestCase
         $this->assertEquals(['foo'], $builder->getBindings());
     }
 
+    public function testUnlessShort()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->unless(['key'=>true])->where('email', 'foo');
+        $this->assertEquals('select * from "users" where "email" = ?', $builder->toSql());
+        $this->assertEquals(['foo'], $builder->getBindings());
+
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->unless(['key'=>'key'])->where('email', 'foo');
+        $this->assertEquals('select * from "users" where "email" = ?', $builder->toSql());
+        $this->assertEquals(['foo'], $builder->getBindings());
+
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->unless(['key'=>false])->where('email', 'foo');
+        $this->assertEquals('select * from "users" where "key" = ? and "email" = ?', $builder->toSql());
+        $this->assertEquals([false, 'foo'], $builder->getBindings());
+    }
+
     public function testUnlessCallback()
     {
         $callback = function ($query, $condition) {
